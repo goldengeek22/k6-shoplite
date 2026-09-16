@@ -22,6 +22,25 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
-
+  app:
+    build:
+      context: ../app/src/ShopLite.Api
+    container_name: shoplite-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: "Host=db;Port=5432;Database=shop;Username=shop;Password=shop"
+      Jwt__Key: "${JWT_KEY:-docker-dev-signing-key-change-me-0123456789}"
+      Chaos__Enabled: "true"
+      Seed__ProductCount: "${SEED_PRODUCT_COUNT:-10000}"
+    ports:
+      - "9063:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1g
 volumes:
   shoplite-k6_pgdata:
