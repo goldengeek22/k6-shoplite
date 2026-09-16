@@ -1,0 +1,117 @@
+@baseUrl = http://localhost:9063
+
+### Health
+GET {{baseUrl}}/health
+
+### Register alice
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{ "username": "alice", "password": "Passw0rd!" }
+
+### Register bob
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{ "username": "bob", "password": "Passw0rd!" }
+
+### Duplicate register (expect 409)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{ "username": "alice", "password": "Passw0rd!" }
+
+### Login alice
+# @name loginAlice
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "username": "alice", "password": "Passw0rd!" }
+
+### Login bob
+# @name loginBob
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "username": "bob", "password": "Passw0rd!" }
+
+###
+@aliceToken = {{loginAlice.response.body.$.token}}
+@bobToken = {{loginBob.response.body.$.token}}
+
+### Wrong password (expect 401)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "username": "alice", "password": "wrong" }
+
+### Browse products
+GET {{baseUrl}}/products?page=0&size=5
+
+### Search by name prefix
+GET {{baseUrl}}/products?q=Blue&size=5
+
+### Filter by category
+GET {{baseUrl}}/products?category=footwear&size=5
+
+### Product by id
+GET {{baseUrl}}/products/42
+
+### Missing product (expect 404)
+GET {{baseUrl}}/products/999999999
+
+### Cart without token (expect 401)
+GET {{baseUrl}}/cart
+
+### Add to cart
+POST {{baseUrl}}/cart/items
+Authorization: Bearer {{aliceToken}}
+Content-Type: application/json
+
+{ "productId": 42, "quantity": 2 }
+
+### Add another item
+POST {{baseUrl}}/cart/items
+Authorization: Bearer {{aliceToken}}
+Content-Type: application/json
+
+{ "productId": 7, "quantity": 1 }
+
+### View cart
+GET {{baseUrl}}/cart
+Authorization: Bearer {{aliceToken}}
+
+### Create order
+# @name createOrder
+POST {{baseUrl}}/orders
+Authorization: Bearer {{aliceToken}}
+
+###
+@orderId = {{createOrder.response.body.$.orderId}}
+
+### Get own order (expect 200)
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{aliceToken}}
+
+### Get someone else's order (expect 403)
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{bobToken}}
+
+### Order with empty cart (expect 400)
+POST {{baseUrl}}/orders
+Authorization: Bearer {{aliceToken}}
+
+### Chaos: view settings
+GET {{baseUrl}}/admin/chaos
+
+### Chaos: add 500ms latency
+POST {{baseUrl}}/admin/chaos
+Content-Type: application/json
+
+{ "latencyMs": 500, "errorRate": 0, "slowQuery": false }
+
+### Chaos: reset
+POST {{baseUrl}}/admin/chaos
+Content-Type: application/json
+
+{ "latencyMs": 0, "errorRate": 0, "slowQuery": false }
