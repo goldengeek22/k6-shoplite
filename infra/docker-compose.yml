@@ -1,0 +1,27 @@
+name: 'shoplite-k6'
+services:
+  db:
+    image: postgres:16
+    container_name: shoplite-db
+    environment:
+      POSTGRES_USER: shop
+      POSTGRES_PASSWORD: shop
+      POSTGRES_DB: shop
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements   # query statistics for performance labs
+      - -c
+      - max_connections=200
+    ports:
+      - "5463:5432"
+    volumes:
+      - shoplite-k6_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shop -d shop"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  shoplite-k6_pgdata:
