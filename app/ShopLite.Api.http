@@ -115,3 +115,9 @@ POST {{baseUrl}}/admin/chaos
 Content-Type: application/json
 
 { "latencyMs": 0, "errorRate": 0, "slowQuery": false }
+
+### Chaos: add 300ms latency
+POST {{baseUrl}}/admin/chaos
+Content-Type: application/json
+
+{ "latencyMs": 300, "errorRate": 0, "slowQuery": false }
