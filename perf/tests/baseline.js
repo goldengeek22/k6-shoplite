@@ -1,6 +1,10 @@
 import { check, sleep } from 'k6';
 import http from 'k6/http';
 
+// ---------------------------------------------------------------------------
+// perf/tests/baseline.js - Lab 2: Baseline the API
+// ---------------------------------------------------------------------------
+
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:9063';
 const PRODUCT_ID_MAX = 10000;
 const SEARCH_QUERY = __ENV.SEARCH_QUERY || '';
